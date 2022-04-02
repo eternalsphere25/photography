@@ -593,19 +593,24 @@ elif selection == 3:
         #Convert raw output to dictionary
         extracted_exif_dict = EXIFToolDataToDict(extracted_exif)
 
-        #Add in missing lens metadata where appropriate
-        if 'CameraModelName' in extracted_exif_dict.keys() and extracted_exif_dict['CameraModelName'] in no_lens_metadata:
-            extracted_exif_dict['LensID'] = missing_lens_model_metadata[extracted_exif_dict['CameraModelName']]
-
-        #Convert smartphone focal lengths to 35 mm equivalents:
-        if extracted_exif_dict['CameraModelName'] in phones_list and extracted_exif_dict['FocalLength'] in phone_35mm_conversion:
-            extracted_exif_dict['FocalLength'] = phone_35mm_conversion[extracted_exif_dict['FocalLength']]
-
         #Precheck #1: Do not process photos with no EXIF data
         if 'CameraModelName' not in extracted_exif_dict.keys():
             no_exif += 1
-        #Precheck #2: Remove selected EXIF tags based on camera (not all include every EXIF tag)
         else:
+            #Add in missing lens metadata where appropriate
+            if 'CameraModelName' in extracted_exif_dict.keys() and extracted_exif_dict['CameraModelName'] in no_lens_metadata:
+
+                #In case there are ILCs without lens metadata
+                if extracted_exif_dict['CameraModelName'] in missing_lens_ILC_metadata.keys():
+                    extracted_exif_dict['LensID'] = missing_lens_ILC_metadata[extracted_exif_dict['CameraModelName']]
+                else:
+                    extracted_exif_dict['LensID'] = missing_lens_model_metadata[extracted_exif_dict['CameraModelName']]
+
+            #Convert smartphone focal lengths to 35 mm equivalents:
+            if extracted_exif_dict['CameraModelName'] in phones_list and extracted_exif_dict['FocalLength'] in phone_35mm_conversion:
+                extracted_exif_dict['FocalLength'] = phone_35mm_conversion[extracted_exif_dict['FocalLength']]
+
+            #Precheck #2: Remove selected EXIF tags based on camera (not all include every EXIF tag)
             batch_parameters_EXIF_mod = batch_parameters_EXIF[:]
             batch_parameters_EXIF_labels_mod = batch_parameters_EXIF_labels[:]
 
@@ -683,19 +688,25 @@ elif selection == 4:
         #Convert raw output to dictionary
         extracted_exif_dict = EXIFToolDataToDict(extracted_exif)
 
-        #Add in missing lens metadata where appropriate
-        if 'CameraModelName' in extracted_exif_dict.keys() and extracted_exif_dict['CameraModelName'] in no_lens_metadata:
-            extracted_exif_dict['LensID'] = missing_lens_model_metadata[extracted_exif_dict['CameraModelName']]
-
-        #Convert smartphone focal lengths to 35 mm equivalents:
-        if extracted_exif_dict['CameraModelName'] in phones_list and extracted_exif_dict['FocalLength'] in phone_35mm_conversion:
-            extracted_exif_dict['FocalLength'] = phone_35mm_conversion[extracted_exif_dict['FocalLength']]
-
         #Precheck #1: Do not process phone camera photos (no EXIF)
         if 'CameraModelName' not in extracted_exif_dict.keys():
             no_exif += 1
-        #Precheck #2: Remove selected EXIF tags based on camera (not all include every EXIF tag)
+
         else:
+            #Add in missing lens metadata where appropriate
+            if 'CameraModelName' in extracted_exif_dict.keys() and extracted_exif_dict['CameraModelName'] in no_lens_metadata:
+
+                if extracted_exif_dict['CameraModelName'] in missing_lens_ILC_metadata.keys():
+                    extracted_exif_dict['LensID'] = missing_lens_ILC_metadata[extracted_exif_dict['CameraModelName']]
+
+                else:
+                    extracted_exif_dict['LensID'] = missing_lens_model_metadata[extracted_exif_dict['CameraModelName']]
+
+            #Convert smartphone focal lengths to 35 mm equivalents:
+            if extracted_exif_dict['CameraModelName'] in phones_list and extracted_exif_dict['FocalLength'] in phone_35mm_conversion:
+                extracted_exif_dict['FocalLength'] = phone_35mm_conversion[extracted_exif_dict['FocalLength']]
+
+            #Precheck #2: Remove selected EXIF tags based on camera (not all include every EXIF tag)
             batch_parameters_EXIF_mod = batch_parameters_EXIF[:]
             batch_parameters_EXIF_labels_mod = batch_parameters_EXIF_labels[:]
 

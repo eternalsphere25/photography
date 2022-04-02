@@ -24,7 +24,8 @@ point_and_shoot_list = [
     'Canon PowerShot S45',
     'COOLPIX L4',
     'COOLPIX L10',
-    'COOLPIX L12'
+    'COOLPIX L12',
+    'COOLPIX L15'
     ]
 
 exposure_programs_list = [
@@ -170,7 +171,8 @@ no_lens_metadata = [
     'Canon PowerShot S45',
     'COOLPIX L4',
     'COOLPIX L10',
-    'COOLPIX L12'
+    'COOLPIX L12',
+    'COOLPIX L15'
     ]
 
 missing_lens_model_metadata = {
@@ -181,7 +183,8 @@ missing_lens_model_metadata = {
     'Canon PowerShot S45': 'Canon 7.1-21.3 mm zoom lens (35 mm equivalent: 35-105 mm); f/2.8-4.9',
     'COOLPIX L4': 'Nikkor 6.3-18.9 mm (35 mm equivalent: 38-114 mm); f/2.8-4.9',
     'COOLPIX L10': 'Nikkor 6.2-18.6 mm (35 mm equivalent: 37.5-112.5 mm); f/2.8-5.2',
-    'COOLPIX L12': 'Nikkor 5.7-17.1 mm (35 mm equivalent: 35-105 mm); f/2.8-4.7'
+    'COOLPIX L12': 'Nikkor 5.7-17.1 mm (35 mm equivalent: 35-105 mm); f/2.8-4.7',
+    'COOLPIX L15': 'Nikkor 5.7-17.1 mm (35 mm equivalent: 35-105 mm); f/2.8-4.7'
     }
 
 missing_lens_manufacturer = {
@@ -192,8 +195,13 @@ missing_lens_manufacturer = {
     'Canon PowerShot S45': 'Canon',
     'COOLPIX L4': 'Nikon',
     'COOLPIX L10': 'Nikon',
-    'COOLPIX L12': 'Nikon'
+    'COOLPIX L12': 'Nikon',
+    'COOLPIX L15': 'Nikon'
     }
+
+missing_lens_ILC_metadata = {
+    'Canon EOS DIGITAL REBEL XT': 'No Lens Data',
+    'Canon EOS DIGITAL REBEL': 'No Lens Data',}
 
 phone_35mm_conversion = {
     '3.7 mm': '3.7 mm (35 mm equivalent: 26.68 mm)',

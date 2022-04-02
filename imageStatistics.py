@@ -26,12 +26,18 @@ def bar_graph_basic(input_df, input_labels, ax_labels, title, round_to, orientat
         if round_to == 5:
             ax.set_ylim(0, round_to_nearest_five(max_y_value))
         elif round_to == 10:
-            ax.set_ylim(0, round_to_nearest_ten(max_y_value))        
+            ax.set_ylim(0, round_to_nearest_ten(max_y_value))
+        elif round_to == 50:
+            ax.set_ylim(0, round_to_nearest_fifty(max_y_value))
         ax.set_xlim(-1, len(input_df))
 
         #Set tick numbers and labels
-        ax.yaxis.set_major_locator(MultipleLocator(5))
-        ax.yaxis.set_minor_locator(AutoMinorLocator(5))
+        if max_y_value <= 100:
+            ax.yaxis.set_major_locator(MultipleLocator(10))
+            ax.yaxis.set_minor_locator(AutoMinorLocator(5))
+        elif 100 < max_x_value <= 1000:
+            ax.yaxis.set_major_locator(MultipleLocator(100))
+            ax.yaxis.set_minor_locator(AutoMinorLocator(5))     
         ax.set_xticklabels(input_labels, rotation=90)
 
         #Set grid
@@ -39,7 +45,7 @@ def bar_graph_basic(input_df, input_labels, ax_labels, title, round_to, orientat
         ax.set_axisbelow(True)
 
     elif orientation == 'h':
-        fig, ax = plt.subplots(figsize=(8,10))
+        fig, ax = plt.subplots(figsize=(16,20))
         ax = input_df['Count'].plot(kind='barh',legend=False)
 
         #Set axis labels
@@ -51,12 +57,18 @@ def bar_graph_basic(input_df, input_labels, ax_labels, title, round_to, orientat
         if round_to == 5:
             ax.set_xlim(0, round_to_nearest_five(max_x_value))
         elif round_to == 10:
-            ax.set_xlim(0, round_to_nearest_ten(max_x_value))        
+            ax.set_xlim(0, round_to_nearest_ten(max_x_value))
+        elif round_to == 50:
+            ax.set_xlim(0, round_to_nearest_fifty(max_x_value))  
         ax.set_ylim(-1, len(input_df))
 
         #Set tick numbers and labels
-        ax.xaxis.set_major_locator(MultipleLocator(10))
-        ax.xaxis.set_minor_locator(AutoMinorLocator(5))
+        if max_x_value <= 100:
+            ax.xaxis.set_major_locator(MultipleLocator(10))
+            ax.xaxis.set_minor_locator(AutoMinorLocator(5))
+        elif 100 < max_x_value <= 1000:
+            ax.xaxis.set_major_locator(MultipleLocator(100))
+            ax.xaxis.set_minor_locator(AutoMinorLocator(5))           
         ax.set_yticklabels(input_labels)
 
         #Set grid
@@ -126,6 +138,15 @@ def round_to_nearest_five(input_value):
 
 def round_to_nearest_ten(input_value):
     value = math.ceil(input_value/10)*10
+    return value
+
+def round_to_nearest_fifty(input_value):
+    value = int(str(input_value/10).split('.')[1])
+    if value < 6:
+        value_whole = int(str(input_value/10).split('.')[0])
+        value = round_to_nearest_ten(value_whole)*10
+    else:
+        value = math.ceil(input_value/10)*10
     return value
 
 def set_default_font():
@@ -206,58 +227,34 @@ df_focal_length = generate_dataframe_from_ods_raw(focal_length_rows)
 # PART 4: Basic visualizations of data
 #-------------------------------------------------------------------------------
 
-#++++++++++++++++++++++++++++++++++++++++
 # 4A: Manufacturer
-#++++++++++++++++++++++++++++++++++++++++
-
 labels = ['Manufacturer', 'Manufacturer', 'Manufacturer']
-output_as_bar_graph(df_manufacturers, 'Manufacturer', labels[0], labels[1:3], 10, 'h', file_name + '_manufacturer.png')
+output_as_bar_graph(df_manufacturers, 'Manufacturer', labels[0], labels[1:3], 50, 'h', file_name + '_manufacturer.png')
 
-#++++++++++++++++++++++++++++++++++++++++
 # 4B: Cameras
-#++++++++++++++++++++++++++++++++++++++++
-
 labels = ['Cameras', 'Cameras', 'Count']
-output_as_bar_graph(df_cameras, 'Cameras', labels[0], labels[1:3], 10, 'h', file_name + '_cameras.png')
+output_as_bar_graph(df_cameras, 'Cameras', labels[0], labels[1:3], 50, 'h', file_name + '_cameras.png')
 
-#++++++++++++++++++++++++++++++++++++++++
 # 4C: Lenses
-#++++++++++++++++++++++++++++++++++++++++
-
 labels = ['Lenses', 'Lenses', 'Count']
 output_as_bar_graph(df_lenses, 'Lenses', labels[0], labels[1:3], 10, 'h', file_name + '_lenses.png')
 
-#++++++++++++++++++++++++++++++++++++++++
 # 4D: Shooting Mode
-#++++++++++++++++++++++++++++++++++++++++
-
 labels = ['Shooting Mode', 'Shooting Mode', 'Count']
 output_as_bar_graph(df_mode, 'Shooting Modes', labels[0], labels[1:3], 10, 'h', file_name + '_mode.png')
 
-#++++++++++++++++++++++++++++++++++++++++
 # 4E: Aperture
-#++++++++++++++++++++++++++++++++++++++++
-
 labels = ['Aperture', 'Aperture', 'Count']
 output_as_bar_graph(df_aperture, 'Apertures', labels[0], labels[1:3], 10, 'h', file_name + '_aperture.png')
 
-#++++++++++++++++++++++++++++++++++++++++
 # 4F: Shutter Speed
-#++++++++++++++++++++++++++++++++++++++++
-
 labels = ['Shutter Speed', 'Shutter Speed', 'Count']
 output_as_bar_graph(df_shutter_speed, 'Shutter Speed', labels[0], labels[1:3], 10, 'h', file_name + '_shutter_speed.png')
 
-#++++++++++++++++++++++++++++++++++++++++
 # 4G: ISO
-#++++++++++++++++++++++++++++++++++++++++
-
 labels = ['ISO', 'ISO', 'Count']
 output_as_bar_graph(df_iso, 'ISO', labels[0], labels[1:3], 10, 'h', file_name + '_iso.png')
 
-#++++++++++++++++++++++++++++++++++++++++
 # 4H: Focal Length
-#++++++++++++++++++++++++++++++++++++++++
-
 labels = ['Focal Length', '35mm Focal Length (mm)', 'Count']
 output_as_bar_graph(df_focal_length, 'Focal Length', labels[0], labels[1:3], 10, 'h', file_name + '_focal_length.png')
