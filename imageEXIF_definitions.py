@@ -1,10 +1,20 @@
+#++++++++++++++++++++++++++++++++++++++++
+# Manufacturer/Brand lists
+#++++++++++++++++++++++++++++++++++++++++
+
 manufacturers_list = [
-    'NIKON CORPORATION'
+    'NIKON',
+    'Canon'
     ]
+
+#++++++++++++++++++++++++++++++++++++++++
+# Camera lists
+#++++++++++++++++++++++++++++++++++++++++
 
 dslr_list = [
     'NIKON D80',
     'NIKON D600',
+    'Canon EOS DIGITAL REBEL XTi',
     'Canon EOS DIGITAL REBEL XT',
     'Canon EOS DIGITAL REBEL'
     ]
@@ -13,10 +23,8 @@ mirrorless_list = [
     'NIKON Z 6_2'
     ]
 
-phones_list = [
-    'SAMSUNG-SGH-I747',
-    'SAMSUNG-SM-G900A',
-    'SM-G950F'
+bridge_list = [
+    'DMC-FZ28'
     ]
 
 point_and_shoot_list = [
@@ -28,6 +36,12 @@ point_and_shoot_list = [
     'COOLPIX L15'
     ]
 
+phones_list = [
+    'SAMSUNG-SGH-I747',
+    'SAMSUNG-SM-G900A',
+    'SM-G950F'
+    ]
+
 exposure_programs_list = [
     'Not Defined',
     'Aperture-priority AE',
@@ -35,6 +49,10 @@ exposure_programs_list = [
     'Manual',
     'Auto'
     ]
+
+#++++++++++++++++++++++++++++++++++++++++
+# Lens lists
+#++++++++++++++++++++++++++++++++++++++++
 
 lens_list_z_mount = [
     "NIKKOR Z 24-120mm f/4 S"
@@ -58,6 +76,10 @@ lens_list_f_mount_DX = [
     "AF-S DX VR Zoom-Nikkor 18-200mm f/3.5-5.6G IF-ED [II] or AF-S DX VR Zoom-Nikkor 18-200mm f/3.5-5.6G IF-ED",
     "AF-S DX VR Zoom-Nikkor 18-200mm f/3.5-5.6G IF-ED or AF-S DX VR Zoom-Nikkor 18-200mm f/3.5-5.6G IF-ED [II]",
     ]
+
+#++++++++++++++++++++++++++++++++++++++++
+# General camera settings lists
+#++++++++++++++++++++++++++++++++++++++++
 
 iso_list = [
     '100',
@@ -116,6 +138,11 @@ aperture_list = [
     '22'
     ]
 
+#++++++++++++++++++++++++++++++++++++++++
+# EXIF parameters to search for, text
+# labels, and empty dictionaries for each
+#++++++++++++++++++++++++++++++++++++++++
+
 batch_parameters_EXIF = [
     'Make',
     'CameraModelName',
@@ -138,13 +165,6 @@ batch_parameters_EXIF_labels = [
     'Focal Lengths'
     ]
 
-shutter_speed_frac_dec = {
-    '0.6': '1/1.6',
-    '0.5': '1/2',
-    '0.4': '1/2.5', 
-    '0.3': '1/3'
-    }
-
 metadata_tally_dict = {}
 manufacturers_EXIF_dict = {}
 cameras_EXIF_dict = {}
@@ -154,6 +174,27 @@ aperture_EXIF_dict = {}
 shutter_speed_EXIF_dict = {}
 iso_EXIF_dict = {}
 focal_length_EXIF_dict = {}
+
+#++++++++++++++++++++++++++++++++++++++++
+# Conversion values (for labeling)
+#++++++++++++++++++++++++++++++++++++++++
+
+shutter_speed_frac_dec = {
+    '0.6': '1/1.6',
+    '0.5': '1/2',
+    '0.4': '1/2.5', 
+    '0.3': '1/3'
+    }
+
+phone_35mm_conversion = {
+    '3.7 mm': '3.7 mm (35 mm equivalent: 26.68 mm)',
+    '4.8 mm': '4.8 mm (35 mm equivalent: 31 mm)',
+    '4.2 mm': '4.2 mm (35 mm equivalent: 26 mm)'
+    }
+
+#++++++++++++++++++++++++++++++++++++++++
+# Cameras with no registered metadata
+#++++++++++++++++++++++++++++++++++++++++
 
 no_exposure_program = [
     'Canon PowerShot S45',
@@ -172,8 +213,14 @@ no_lens_metadata = [
     'COOLPIX L4',
     'COOLPIX L10',
     'COOLPIX L12',
-    'COOLPIX L15'
+    'COOLPIX L15',
+    'DMC-FZ28'
     ]
+
+#++++++++++++++++++++++++++++++++++++++++
+# Missing values for cameras that don't
+# record certain metadata
+#++++++++++++++++++++++++++++++++++++++++
 
 missing_lens_model_metadata = {
     'SAMSUNG-SGH-I747': 'Samsung 3.7 mm (35 mm equivalent: 26.68 mm); f/2.6',
@@ -184,7 +231,11 @@ missing_lens_model_metadata = {
     'COOLPIX L4': 'Nikkor 6.3-18.9 mm (35 mm equivalent: 38-114 mm); f/2.8-4.9',
     'COOLPIX L10': 'Nikkor 6.2-18.6 mm (35 mm equivalent: 37.5-112.5 mm); f/2.8-5.2',
     'COOLPIX L12': 'Nikkor 5.7-17.1 mm (35 mm equivalent: 35-105 mm); f/2.8-4.7',
-    'COOLPIX L15': 'Nikkor 5.7-17.1 mm (35 mm equivalent: 35-105 mm); f/2.8-4.7'
+    'COOLPIX L15': 'Nikkor 5.7-17.1 mm (35 mm equivalent: 35-105 mm); f/2.8-4.7',
+    'DMC-FZ28': 'LEICA DC VARIO-ELMARIT 4.8-86.4 mm (35 mm equivalent: 27-486 mm); f/2.8 (wide) / f/4.4 (tele) - f/8',
+    'Canon EOS DIGITAL REBEL XTi': 'No Lens Data',
+    'Canon EOS DIGITAL REBEL XT': 'No Lens Data',
+    'Canon EOS DIGITAL REBEL': 'No Lens Data',
     }
 
 missing_lens_manufacturer = {
@@ -196,15 +247,23 @@ missing_lens_manufacturer = {
     'COOLPIX L4': 'Nikon',
     'COOLPIX L10': 'Nikon',
     'COOLPIX L12': 'Nikon',
-    'COOLPIX L15': 'Nikon'
+    'COOLPIX L15': 'Nikon',
+    'DMC-FZ28': 'Leica'
     }
 
-missing_lens_ILC_metadata = {
-    'Canon EOS DIGITAL REBEL XT': 'No Lens Data',
-    'Canon EOS DIGITAL REBEL': 'No Lens Data',}
+missing_ISO_metadata = {
+    'Canon PowerShot S45': '-1',
+    'DMC-FZ28': '-1'
+    }
 
-phone_35mm_conversion = {
-    '3.7 mm': '3.7 mm (35 mm equivalent: 26.68 mm)',
-    '4.8 mm': '4.8 mm (35 mm equivalent: 31 mm)',
-    '4.2 mm': '4.2 mm (35 mm equivalent: 26 mm)'
+#++++++++++++++++++++++++++++++++++++++++
+# Exception folders for cameras with
+# inconsistent metadata recording
+#++++++++++++++++++++++++++++++++++++++++
+
+missing_metadata_exception_folders = {
+    'Canon PowerShot S45': [
+        '2009-03-15', '2009-03-23', '2009-03-24', '2009-03-27', 
+        '2009-03-28', '2009-03-31', '2009-04-08', '2009-04-14'
+        ]
     }

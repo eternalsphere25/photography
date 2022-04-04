@@ -40,6 +40,10 @@ def checkForEXIF(input_image):
     value = input_image.has_exif
     return value
 
+def check_if_lens_unknown(input_dict):
+    if bool(re.match('Unknown', input_dict['LensID'])) == True:
+        input_dict['LensID'] = missing_lens_model_metadata[input_dict['CameraModelName']]
+
 def convertToDecimalDegrees(coordinates, reference):
     gps_degrees = coordinates[0]
     gps_minutes = coordinates[1]
@@ -125,6 +129,12 @@ def generateLatLongCoords(input_exif_dict):
     coordinates = [latitude, longitude]
     return coordinates
 
+def get_file_directory(file_path):
+    search_regex = re.search(".*(?=\\\)", file_path)
+    search_result = search_regex.group(0)
+    string = search_result.split("\\")[-1]
+    return string
+
 def listAllEXIFData(input_image):
     for item in range(len(input_image.list_all())):
         print(input_image.list_all()[item])
@@ -133,11 +143,13 @@ def listEXIFCameraInfoEXIFTool(input_exif_dict):
     print('\nCamera Information:')
     print('- Make: ' + input_exif_dict['Make'])
     print('- Model: ' + input_exif_dict['CameraModelName'])
+
     #Exclude body serial number if it does not exist
-    if input_exif_dict['CameraModelName'] not in phones_list and input_exif_dict['CameraModelName'] not in point_and_shoot_list:
+    if 'SerialNumber' in input_exif_dict.keys():
         print('- Body Serial Number: ' + input_exif_dict['SerialNumber'])
     else:
         print('- Body Serial Number: N/A')
+
     #Show body type (DSLR, point and shoot, phone, etc)
     if input_exif_dict['CameraModelName'] in phones_list:
         print('- Body Type: ' + input_exif_dict['DeviceType'])
@@ -146,6 +158,8 @@ def listEXIFCameraInfoEXIFTool(input_exif_dict):
             print('- Body Type: Digital SLR')
         elif input_exif_dict['CameraModelName'] in mirrorless_list:
             print('- Body Type: Mirrorless')
+        elif input_exif_dict['CameraModelName'] in bridge_list:
+            print('- Body Type: Bridge')
         elif input_exif_dict['CameraModelName'] in point_and_shoot_list:
             print('- Body Type: Compact Digital')
 
@@ -158,15 +172,24 @@ def listEXIFGPSInfoEXIFTool(input_exif_dict):
 
 def listEXIFImageInfoEXIFTool(input_exif_dict):
     print('\nImage Information:')
-    if input_exif_dict['CameraModelName'] not in point_and_shoot_list and input_exif_dict['CameraModelName'] != 'Canon EOS DIGITAL REBEL':
+
+    #Exposure Mode
+    #if input_exif_dict['CameraModelName'] not in point_and_shoot_list and input_exif_dict['CameraModelName'] != 'Canon EOS DIGITAL REBEL':
+    #    print('- Exposure Program: ' + input_exif_dict['ExposureProgram'])
+    #else:
+    #    print('- Exposure Program: N/A')
+
+    if 'ExposureProgram' in input_exif_dict.keys():
         print('- Exposure Program: ' + input_exif_dict['ExposureProgram'])
     else:
-        print('- Exposure Program: N/A')
+        print('- Exposure Program: N/A')        
+
+    #Shutter, Aperture, ISO, etc
     print('- Exposure Time: ' + input_exif_dict['ExposureTime'])
     print('- Aperture: ' + input_exif_dict['FNumber'])
     print('- ISO: ' + input_exif_dict['ISO'])
     print('- Focal Length: ' + input_exif_dict['FocalLength'])
-    if input_exif_dict['CameraModelName'] not in no_lens_metadata:
+    if 'FocalLengthIn35mmFormat' in input_exif_dict.keys():
         print('- Focal Length in 35mm Film: ' + input_exif_dict['FocalLengthIn35mmFormat'])
     else:
         print('- Focal Length in 35mm Film: N/A')
@@ -176,24 +199,40 @@ def listEXIFImageInfoEXIFTool(input_exif_dict):
 
 def listEXIFLensInfoEXIFTool(input_exif_dict):
     print('\nLens Information:')
+
     #Lens Manufacturer
-    if input_exif_dict['CameraModelName'] not in no_lens_metadata:
+    if 'LensMake' in input_exif_dict.keys():
         print('- Lens Manufacturer: ' + input_exif_dict['LensMake'])
     elif input_exif_dict['CameraModelName'] in no_lens_metadata:
         print('- Lens Manufacturer: ' + missing_lens_manufacturer[input_exif_dict['CameraModelName']])
     else:
         print('- Lens Manufacturer: N/A')
+
     #Lens Name
-    if input_exif_dict['CameraModelName'] not in missing_lens_model_metadata:
+    if 'LensID' in input_exif_dict.keys():
         print('- Lens Model: ' + input_exif_dict['LensID'])
-    else:
+    elif input_exif_dict['CameraModelName'] in no_lens_metadata:
         print('- Lens Model: ' + missing_lens_model_metadata[input_exif_dict['CameraModelName']])
-    #print('- Lens Model: ' + extracted_exif_dict['LensSpec'])
-    #Lens Serial Number
-    if input_exif_dict['CameraModelName'] not in no_lens_metadata:
-        print('- Lens Serial Number: ' + input_exif_dict['LensSerialNumber'])
     else:
+        print('- Lens Model: N/A')
+
+    #Lens Serial Number
+    if 'LensSerialNumber' in input_exif_dict.keys():
+        print('- Lens Serial Number: ' + input_exif_dict['LensSerialNumber'])
+    else:        
         print('- Lens Serial Number: N/A')
+
+def missing_metadata_add(input_dict, missing_info_dict):
+    value = missing_info_dict[input_dict['CameraModelName']]
+    return value
+
+def missing_metadata_check(input_dict):
+    missing_keys = []
+    for item in range(len(batch_parameters_EXIF)):
+        key = batch_parameters_EXIF[item]
+        if key not in input_dict:
+            missing_keys.append(key)
+    return missing_keys
 
 def openImageFile():
     directory = input('\nInput file directory:')
@@ -587,7 +626,7 @@ elif selection == 3:
     print('\nExtracting metadata. Be patient, this may take a while...')
     initial_loop = False
     for photo in tqdm(range(len(files_list))):
-        file_to_analyze = str(directory + '/' + files_list[photo] + '\n')
+        file_to_analyze = str(directory + "\\" + files_list[photo] + '\n')
         extracted_exif = extractMetadataExifTool(selection, exiftool_location, exiftool_write_file, file_to_analyze)
 
         #Convert raw output to dictionary
@@ -597,26 +636,52 @@ elif selection == 3:
         if 'CameraModelName' not in extracted_exif_dict.keys():
             no_exif += 1
         else:
-            #Add in missing lens metadata where appropriate
-            if 'CameraModelName' in extracted_exif_dict.keys() and extracted_exif_dict['CameraModelName'] in no_lens_metadata:
+            #Define EXIF parameters
+            batch_parameters_EXIF_mod = batch_parameters_EXIF[:]
+            batch_parameters_EXIF_labels_mod = batch_parameters_EXIF_labels[:]
 
-                #In case there are ILCs without lens metadata
-                if extracted_exif_dict['CameraModelName'] in missing_lens_ILC_metadata.keys():
-                    extracted_exif_dict['LensID'] = missing_lens_ILC_metadata[extracted_exif_dict['CameraModelName']]
+            #Check if there is any missing metadata
+            missing_metadata = missing_metadata_check(extracted_exif_dict)
+            if len(missing_metadata) != 0:
+
+                print(missing_metadata)
+
+                #Replace 'ExposureProgram' with 'ExposureMode' if missing
+                if 'ExposureProgram' in missing_metadata:
+                    index = batch_parameters_EXIF_mod.index('ExposureProgram')
+                    batch_parameters_EXIF_mod[index] = 'ExposureMode'
+
+                #Find the folder name that the file is in
+                current_folder = get_file_directory(file_to_analyze)
+                if extracted_exif_dict['CameraModelName'] in missing_metadata_exception_folders.keys():
+                    exception_folder_list = missing_metadata_exception_folders[extracted_exif_dict['CameraModelName']]
                 else:
-                    extracted_exif_dict['LensID'] = missing_lens_model_metadata[extracted_exif_dict['CameraModelName']]
+                    exception_folder_list = []
+
+                #Check if the camera has any metadata folder exceptions 
+                if extracted_exif_dict['CameraModelName'] in missing_metadata_exception_folders.keys() and current_folder in exception_folder_list:
+                    #Check if the current folder matches any of the exception folders
+                    for item in range(len(exception_folder_list)):
+                        if current_folder == exception_folder_list[item]:
+                            #Figure out which exception it is (missing lens, ISO etc), then add the relevant metadata
+                            if extracted_exif_dict['CameraModelName'] in missing_ISO_metadata.keys() and 'ISO' in missing_metadata:
+                                extracted_exif_dict['ISO'] = missing_metadata_add(extracted_exif_dict, missing_ISO_metadata)
+                            if extracted_exif_dict['CameraModelName'] in missing_lens_model_metadata.keys() and 'LensID' in missing_metadata:
+                                extracted_exif_dict['LensID'] = missing_metadata_add(extracted_exif_dict, missing_lens_model_metadata)
+
+                else:
+                    #Add missing metadata
+                    if extracted_exif_dict['CameraModelName'] in missing_ISO_metadata.keys() and 'ISO' in missing_metadata:
+                        extracted_exif_dict['ISO'] = missing_metadata_add(extracted_exif_dict, missing_ISO_metadata)
+                    if extracted_exif_dict['CameraModelName'] in missing_lens_model_metadata.keys() and 'LensID' in missing_metadata:
+                        extracted_exif_dict['LensID'] = missing_metadata_add(extracted_exif_dict, missing_lens_model_metadata)  
+
+            #Check if the lens is listed as 'unknown'
+            check_if_lens_unknown(extracted_exif_dict)
 
             #Convert smartphone focal lengths to 35 mm equivalents:
             if extracted_exif_dict['CameraModelName'] in phones_list and extracted_exif_dict['FocalLength'] in phone_35mm_conversion:
                 extracted_exif_dict['FocalLength'] = phone_35mm_conversion[extracted_exif_dict['FocalLength']]
-
-            #Precheck #2: Remove selected EXIF tags based on camera (not all include every EXIF tag)
-            batch_parameters_EXIF_mod = batch_parameters_EXIF[:]
-            batch_parameters_EXIF_labels_mod = batch_parameters_EXIF_labels[:]
-
-            if extracted_exif_dict['CameraModelName'] in no_exposure_program:
-                index = batch_parameters_EXIF_mod.index('ExposureProgram')
-                batch_parameters_EXIF_mod[index] = 'ExposureMode'
 
             #Sort EXIF into separate dictionaries (set in definitions file)
             sortEXIF(extracted_exif_dict, metadata_tally_dict, batch_parameters_EXIF_mod)
@@ -682,6 +747,7 @@ elif selection == 4:
     print('\nExtracting metadata. Be patient, this may take a while...')
     initial_loop = False
     for photo in tqdm(range(len(full_file_list))):
+        #print(full_file_list[photo])
         file_to_analyze = full_file_list[photo]
         extracted_exif = extractMetadataExifTool(selection, exiftool_location, exiftool_write_file, file_to_analyze)
 
@@ -691,28 +757,52 @@ elif selection == 4:
         #Precheck #1: Do not process phone camera photos (no EXIF)
         if 'CameraModelName' not in extracted_exif_dict.keys():
             no_exif += 1
-
         else:
-            #Add in missing lens metadata where appropriate
-            if 'CameraModelName' in extracted_exif_dict.keys() and extracted_exif_dict['CameraModelName'] in no_lens_metadata:
+            #Define EXIF parameters
+            batch_parameters_EXIF_mod = batch_parameters_EXIF[:]
+            batch_parameters_EXIF_labels_mod = batch_parameters_EXIF_labels[:]
 
-                if extracted_exif_dict['CameraModelName'] in missing_lens_ILC_metadata.keys():
-                    extracted_exif_dict['LensID'] = missing_lens_ILC_metadata[extracted_exif_dict['CameraModelName']]
+            #Check if there is any missing metadata
+            missing_metadata = missing_metadata_check(extracted_exif_dict)
+            if len(missing_metadata) != 0:
+
+                #Replace 'ExposureProgram' with 'ExposureMode' if missing
+                if 'ExposureProgram' in missing_metadata:
+                    index = batch_parameters_EXIF_mod.index('ExposureProgram')
+                    batch_parameters_EXIF_mod[index] = 'ExposureMode'
+
+                #Find the folder name that the file is in
+                current_folder = get_file_directory(file_to_analyze)
+                if extracted_exif_dict['CameraModelName'] in missing_metadata_exception_folders.keys():
+                    exception_folder_list = missing_metadata_exception_folders[extracted_exif_dict['CameraModelName']]
+                else:
+                    exception_folder_list = []
+
+                #Check if the camera has any metadata folder exceptions 
+                if extracted_exif_dict['CameraModelName'] in missing_metadata_exception_folders.keys() and current_folder in exception_folder_list:
+                    #Check if the current folder matches any of the exception folders
+                    for item in range(len(exception_folder_list)):
+                        if current_folder == exception_folder_list[item]:
+                            #Figure out which exception it is (missing lens, ISO etc), then add the relevant metadata
+                            if extracted_exif_dict['CameraModelName'] in missing_ISO_metadata.keys() and 'ISO' in missing_metadata:
+                                extracted_exif_dict['ISO'] = missing_metadata_add(extracted_exif_dict, missing_ISO_metadata)
+                            if extracted_exif_dict['CameraModelName'] in missing_lens_model_metadata.keys() and 'LensID' in missing_metadata:
+                                extracted_exif_dict['LensID'] = missing_metadata_add(extracted_exif_dict, missing_lens_model_metadata)                    
 
                 else:
-                    extracted_exif_dict['LensID'] = missing_lens_model_metadata[extracted_exif_dict['CameraModelName']]
+                    #Add missing metadata
+                    if extracted_exif_dict['CameraModelName'] in missing_ISO_metadata.keys() and 'ISO' in missing_metadata:
+                        extracted_exif_dict['ISO'] = missing_metadata_add(extracted_exif_dict, missing_ISO_metadata)
+                    if extracted_exif_dict['CameraModelName'] in missing_lens_model_metadata.keys() and 'LensID' in missing_metadata:
+                        extracted_exif_dict['LensID'] = missing_metadata_add(extracted_exif_dict, missing_lens_model_metadata)  
+
+            #Check if the lens is listed as 'unknown'
+            if 'LensID' in extracted_exif_dict.keys():
+                check_if_lens_unknown(extracted_exif_dict)
 
             #Convert smartphone focal lengths to 35 mm equivalents:
             if extracted_exif_dict['CameraModelName'] in phones_list and extracted_exif_dict['FocalLength'] in phone_35mm_conversion:
                 extracted_exif_dict['FocalLength'] = phone_35mm_conversion[extracted_exif_dict['FocalLength']]
-
-            #Precheck #2: Remove selected EXIF tags based on camera (not all include every EXIF tag)
-            batch_parameters_EXIF_mod = batch_parameters_EXIF[:]
-            batch_parameters_EXIF_labels_mod = batch_parameters_EXIF_labels[:]
-
-            if extracted_exif_dict['CameraModelName'] in no_exposure_program:
-                index = batch_parameters_EXIF_mod.index('ExposureProgram')
-                batch_parameters_EXIF_mod[index] = 'ExposureMode'
 
             #Sort EXIF into separate dictionaries (set in definitions file)
             sortEXIF(extracted_exif_dict, metadata_tally_dict, batch_parameters_EXIF_mod)
@@ -744,7 +834,7 @@ if selection == 00:
     #Convert raw output to dictionary
     extracted_exif_dict = EXIFToolDataToDict(extracted_exif)
 
-    print('Extracted EXIF data:')
+    print('\nExtracted EXIF data:')
     printDictLineByLine(extracted_exif_dict)
 
 
