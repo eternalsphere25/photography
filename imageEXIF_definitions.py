@@ -75,8 +75,10 @@ lens_list_f_mount_DX = [
     "AF-S DX VR Zoom-Nikkor 16-85mm f/3.5-5.6G ED",
     "AF-S DX Zoom-Nikkor 18-135mm f/3.5-5.6G IF-ED",
     "AF-S DX VR Zoom-Nikkor 18-200mm f/3.5-5.6G IF-ED [II]",
-    "AF-S DX VR Zoom-Nikkor 18-200mm f/3.5-5.6G IF-ED [II] or AF-S DX VR Zoom-Nikkor 18-200mm f/3.5-5.6G IF-ED",
-    "AF-S DX VR Zoom-Nikkor 18-200mm f/3.5-5.6G IF-ED or AF-S DX VR Zoom-Nikkor 18-200mm f/3.5-5.6G IF-ED [II]",
+    ("AF-S DX VR Zoom-Nikkor 18-200mm f/3.5-5.6G IF-ED [II] " 
+    "or AF-S DX VR Zoom-Nikkor 18-200mm f/3.5-5.6G IF-ED"),
+    ("AF-S DX VR Zoom-Nikkor 18-200mm f/3.5-5.6G IF-ED "
+    "or AF-S DX VR Zoom-Nikkor 18-200mm f/3.5-5.6G IF-ED [II]"),
     ]
 
 #++++++++++++++++++++++++++++++++++++++++
@@ -233,21 +235,37 @@ no_lens_metadata = [
 #++++++++++++++++++++++++++++++++++++++++
 
 missing_lens_model_metadata = {
-    'SAMSUNG-SGH-I747': 'Samsung 3.7 mm (35 mm equivalent: 26.68 mm); f/2.6',
-    'SAMSUNG-SM-G900A': 'Samsung 4.8 mm (35 mm equivalent: 31 mm); f/2.2',
-    'SM-G950F': 'Samsung 4.2 mm (35 mm equivalent: 26 mm); f/1.7',
-    'Canon DIGITAL IXUS 55': 'Canon 5.8-17.4 mm (35 mm equivalent: 35-105 mm); f/2.8-4.9',
-    'Canon PowerShot S45': 'Canon 7.1-21.3 mm (35 mm equivalent: 35-105 mm); f/2.8-4.9',
-    'Canon PowerShot A560': 'Canon 5.8-23.2 mm (35 mm equivalent: 35-140 mm); f/2.6-5.5',
-    'COOLPIX L4': 'Nikkor 6.3-18.9 mm (35 mm equivalent: 38-114 mm); f/2.8-4.9',
-    'COOLPIX L10': 'Nikkor 6.2-18.6 mm (35 mm equivalent: 37.5-112.5 mm); f/2.8-5.2',
-    'COOLPIX L12': 'Nikkor 5.7-17.1 mm (35 mm equivalent: 35-105 mm); f/2.8-4.7',
-    'COOLPIX L15': 'Nikkor 5.7-17.1 mm (35 mm equivalent: 35-105 mm); f/2.8-4.7',
-    'COOLPIX S8100': 'Nikkor 5.4-54.0 mm (35 mm equivalent: 30-300mm lens); f/3.5-5.6',
-    'DMC-FZ28': 'LEICA DC VARIO-ELMARIT 4.8-86.4 mm (35 mm equivalent: 27-486 mm); f/2.8 (wide) / f/4.4 (tele) - f/8',
-    'Canon EOS DIGITAL REBEL XTi': 'No Lens Data',
-    'Canon EOS DIGITAL REBEL XT': 'No Lens Data',
-    'Canon EOS DIGITAL REBEL': 'No Lens Data',
+    'SAMSUNG-SGH-I747':
+        'Samsung 3.7 mm (35 mm equivalent: 26.68 mm); f/2.6',
+    'SAMSUNG-SM-G900A':
+        'Samsung 4.8 mm (35 mm equivalent: 31 mm); f/2.2',
+    'SM-G950F':
+        'Samsung 4.2 mm (35 mm equivalent: 26 mm); f/1.7',
+    'Canon DIGITAL IXUS 55': 
+        'Canon 5.8-17.4 mm (35 mm equivalent: 35-105 mm); f/2.8-4.9',
+    'Canon PowerShot S45': 
+        'Canon 7.1-21.3 mm (35 mm equivalent: 35-105 mm); f/2.8-4.9',
+    'Canon PowerShot A560': 
+        'Canon 5.8-23.2 mm (35 mm equivalent: 35-140 mm); f/2.6-5.5',
+    'COOLPIX L4': 
+        'Nikkor 6.3-18.9 mm (35 mm equivalent: 38-114 mm); f/2.8-4.9',
+    'COOLPIX L10': 
+        'Nikkor 6.2-18.6 mm (35 mm equivalent: 37.5-112.5 mm); f/2.8-5.2',
+    'COOLPIX L12':
+        'Nikkor 5.7-17.1 mm (35 mm equivalent: 35-105 mm); f/2.8-4.7',
+    'COOLPIX L15': 
+        'Nikkor 5.7-17.1 mm (35 mm equivalent: 35-105 mm); f/2.8-4.7',
+    'COOLPIX S8100': 
+        'Nikkor 5.4-54.0 mm (35 mm equivalent: 30-300mm lens); f/3.5-5.6',
+    'DMC-FZ28': 
+        ('LEICA DC VARIO-ELMARIT 4.8-86.4 mm (35 mm equivalent: 27-486 mm); '
+        'f/2.8 (wide) / f/4.4 (tele) - f/8'),
+    'Canon EOS DIGITAL REBEL XTi': 
+        'No Lens Data',
+    'Canon EOS DIGITAL REBEL XT': 
+        'No Lens Data',
+    'Canon EOS DIGITAL REBEL': 
+        'No Lens Data',
     }
 
 missing_lens_manufacturer = {
