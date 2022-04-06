@@ -30,10 +30,12 @@ bridge_list = [
 point_and_shoot_list = [
     'Canon DIGITAL IXUS 55',
     'Canon PowerShot S45',
+    'Canon PowerShot A560',
     'COOLPIX L4',
     'COOLPIX L10',
     'COOLPIX L12',
-    'COOLPIX L15'
+    'COOLPIX L15',
+    'COOLPIX S8100'
     ]
 
 phones_list = [
@@ -186,6 +188,12 @@ shutter_speed_frac_dec = {
     '0.3': '1/3'
     }
 
+hi_iso = {
+    'Hi 2000': 2000,
+    'Hi 2500': 2500,
+    'Hi 3200': 3200
+    }
+
 phone_35mm_conversion = {
     '3.7 mm': '3.7 mm (35 mm equivalent: 26.68 mm)',
     '4.8 mm': '4.8 mm (35 mm equivalent: 31 mm)',
@@ -210,16 +218,18 @@ no_lens_metadata = [
     'SM-G950F',
     'Canon DIGITAL IXUS 55',
     'Canon PowerShot S45',
+    'Canon PowerShot A560',
     'COOLPIX L4',
     'COOLPIX L10',
     'COOLPIX L12',
     'COOLPIX L15',
+    'COOLPIX S8100'
     'DMC-FZ28'
     ]
 
 #++++++++++++++++++++++++++++++++++++++++
-# Missing values for cameras that don't
-# record certain metadata
+# Missing values for cameras/lenses that 
+# don't record some metadata
 #++++++++++++++++++++++++++++++++++++++++
 
 missing_lens_model_metadata = {
@@ -227,11 +237,13 @@ missing_lens_model_metadata = {
     'SAMSUNG-SM-G900A': 'Samsung 4.8 mm (35 mm equivalent: 31 mm); f/2.2',
     'SM-G950F': 'Samsung 4.2 mm (35 mm equivalent: 26 mm); f/1.7',
     'Canon DIGITAL IXUS 55': 'Canon 5.8-17.4 mm (35 mm equivalent: 35-105 mm); f/2.8-4.9',
-    'Canon PowerShot S45': 'Canon 7.1-21.3 mm zoom lens (35 mm equivalent: 35-105 mm); f/2.8-4.9',
+    'Canon PowerShot S45': 'Canon 7.1-21.3 mm (35 mm equivalent: 35-105 mm); f/2.8-4.9',
+    'Canon PowerShot A560': 'Canon 5.8-23.2 mm (35 mm equivalent: 35-140 mm); f/2.6-5.5',
     'COOLPIX L4': 'Nikkor 6.3-18.9 mm (35 mm equivalent: 38-114 mm); f/2.8-4.9',
     'COOLPIX L10': 'Nikkor 6.2-18.6 mm (35 mm equivalent: 37.5-112.5 mm); f/2.8-5.2',
     'COOLPIX L12': 'Nikkor 5.7-17.1 mm (35 mm equivalent: 35-105 mm); f/2.8-4.7',
     'COOLPIX L15': 'Nikkor 5.7-17.1 mm (35 mm equivalent: 35-105 mm); f/2.8-4.7',
+    'COOLPIX S8100': 'Nikkor 5.4-54.0 mm (35 mm equivalent: 30-300mm lens); f/3.5-5.6',
     'DMC-FZ28': 'LEICA DC VARIO-ELMARIT 4.8-86.4 mm (35 mm equivalent: 27-486 mm); f/2.8 (wide) / f/4.4 (tele) - f/8',
     'Canon EOS DIGITAL REBEL XTi': 'No Lens Data',
     'Canon EOS DIGITAL REBEL XT': 'No Lens Data',
@@ -244,16 +256,24 @@ missing_lens_manufacturer = {
     'SM-G950F': 'Samsung',
     'Canon DIGITAL IXUS 55': 'Canon',
     'Canon PowerShot S45': 'Canon',
+    'Canon PowerShot A560': 'Canon',
     'COOLPIX L4': 'Nikon',
     'COOLPIX L10': 'Nikon',
     'COOLPIX L12': 'Nikon',
     'COOLPIX L15': 'Nikon',
+    'COOLPIX S8100': 'Nikon',
     'DMC-FZ28': 'Leica'
     }
 
 missing_ISO_metadata = {
     'Canon PowerShot S45': '-1',
     'DMC-FZ28': '-1'
+    }
+
+manual_lens_filler = {
+    'FNumber': '0.0',
+    'FocalLength': '0.0 mm (35 mm equivalent: 0.0 mm)',
+    'FocalLengthIn35mmFormat': '0.0 mm',
     }
 
 #++++++++++++++++++++++++++++++++++++++++
