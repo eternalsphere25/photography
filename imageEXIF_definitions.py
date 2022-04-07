@@ -169,16 +169,6 @@ batch_parameters_EXIF_labels = [
     'Focal Lengths'
     ]
 
-metadata_tally_dict = {}
-manufacturers_EXIF_dict = {}
-cameras_EXIF_dict = {}
-lenses_EXIF_dict = {}
-mode_EXIF_dict = {}
-aperture_EXIF_dict = {}
-shutter_speed_EXIF_dict = {}
-iso_EXIF_dict = {}
-focal_length_EXIF_dict = {}
-
 #++++++++++++++++++++++++++++++++++++++++
 # Conversion values (for labeling)
 #++++++++++++++++++++++++++++++++++++++++

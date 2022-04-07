@@ -36,6 +36,56 @@ from imageEXIF_definitions import *
 from tqdm import tqdm
 
 
+class MetadataDict:
+    def __init__(self):
+        self.metadata = {}
+        self.to_ods = []
+
+    def convert_to_list(self, input_dict):
+        self.metadata = list(input_dict.items())
+
+    def finalize_data(self, input_dict):
+        self.metadata = input_dict
+
+    def incr_key(self, input_dict, input_key):
+        input_dict[input_key] = input_dict.get(input_key, 0) + 1
+
+    def init_key(self, input_dict, input_key):
+        input_dict[input_key] = 1
+    
+    def insert_null_values(self, expected_total_photos):
+        actual_total_photos = sum(self.metadata.values())
+        if actual_total_photos != expected_total_photos:
+            if no_exif == 0:
+                total_diff = expected_total_photos - actual_total_photos
+                self.metadata.update({'N/A': total_diff})
+            else:
+                total_diff = (expected_total_photos - actual_total_photos - no_exif)
+                if total_diff != 0:
+                    self.metadata.update({'N/A': total_diff})
+                self.metadata.update({'No Metadata': no_exif})
+
+    def prepare_for_export2(self, input_dict):
+        self.metadata = input_dict
+
+    def prepare_for_export(self, input_dict):
+        #Finalize the data in the dictionary before export
+        self.finalize_data(input_dict)
+
+        #Insert any null values
+        if selection == 3:
+            expected_total_photos = len(files_list)
+        elif selection == 4:
+            expected_total_photos = len(full_file_list)
+        self.insert_null_values(expected_total_photos)
+
+        #Convert dictionaries into lists
+        self.convert_to_list(self.metadata)
+
+    def format_for_ods(self, input_title):
+        self.to_ods = [[input_title, "Count"]] + self.metadata + [""]
+
+
 def checkForEXIF(input_image):
     value = input_image.has_exif
     return value
@@ -64,12 +114,6 @@ def convert_all_dict_keys_to_str(input_dict):
     keys_values = input_dict.items()
     new_dict = {str(key): value for key, value in keys_values}
     return new_dict
-
-def dict_incr_key(input_dict, input_key):
-    input_dict[input_key] = input_dict.get(input_key, 0) + 1
-
-def dict_init_key(input_dict, input_key):
-    input_dict[input_key] = 1
 
 def EXIFTool_data_to_dict(raw_input):
     extracted_exif_list = raw_input.split("\\r\\n")
@@ -266,26 +310,26 @@ def print_all_EXIF_dicts():
     print("")
     print('='*80)
     print('\nManufacturers:')
-    print_dict_line_by_line(manufacturers_EXIF_dict)
+    print_dict_line_by_line(manufacturers.metadata)
     print('\nCameras:')
-    print_dict_line_by_line(cameras_EXIF_dict)
+    print_dict_line_by_line(cameras.metadata)
     print('\nLenses:')
-    print_dict_line_by_line(lenses_EXIF_dict)
+    print_dict_line_by_line(lenses.metadata)
     print('\nShooting Modes:')
-    print_dict_line_by_line(mode_EXIF_dict)
+    print_dict_line_by_line(mode.metadata)
     print('\nApertures:')
-    print_dict_line_by_line(sort_dict_by_key(aperture_EXIF_dict, 'float'))
+    print_dict_line_by_line(sort_dict_by_key(aperture.metadata, 'float'))
     print('\nShutter Speeds:')
     print_dict_line_by_line(
-        sort_dict_by_key(shutter_speed_EXIF_dict, 'shutter'))
+        sort_dict_by_key(shutter_speed.metadata, 'shutter'))
     print('\nISOs:')
-    print_dict_line_by_line(sort_dict_by_key(iso_EXIF_dict, 'int'))
+    print_dict_line_by_line(sort_dict_by_key(iso.metadata, 'int'))
     print('\nFocal Lengths:')
     print_dict_line_by_line(
-        sort_dict_by_key(focal_length_EXIF_dict, 'focal_length'))
-    if bool(metadata_tally_dict) == True:
+        sort_dict_by_key(focal_length.metadata, 'focal_length'))
+    if bool(unclassified.metadata) == True:
         print('\nUnclassified:')
-        print_dict_line_by_line(metadata_tally_dict)   
+        print_dict_line_by_line(unclassified.metadata)   
 
 def print_dict_line_by_line(input_dict):
     for key, value in input_dict.items():
@@ -324,9 +368,7 @@ def process_metadata(file_to_analyze, extracted_exif_dict):
             extracted_exif_dict['FocalLength']]
 
     #Sort EXIF into separate dictionaries (set in definitions file)
-    sort_EXIF(
-        extracted_exif_dict, metadata_tally_dict, batch_parameters_EXIF_mod
-        )
+    sort_EXIF(extracted_exif_dict, batch_parameters_EXIF_mod)
 
 def process_missing_metadata(
     file_to_analyze, extracted_exif_dict, missing_metadata_list, exif_list):
@@ -420,8 +462,8 @@ def sort_dict_by_key(input_dict, mode):
     elif mode == 'shutter':
         #Generate list of shutter speeds in decimal
         shutter_list = []
-        for item in range(len(shutter_speed_EXIF_dict.items())):
-            key_list = shutter_speed_EXIF_dict.keys()
+        for item in range(len(input_dict.items())):
+            key_list = input_dict.keys()
             key_list = [x for x in key_list]
             if bool(re.search("\/", key_list[item])) == True:
                 value = fraction_string_to_decimal(key_list[item])
@@ -446,12 +488,12 @@ def sort_dict_by_key(input_dict, mode):
             for entry in range(len(key_list)):
                 if shutter_list_sorted[item] == key_list[entry]:
                     sorted_dict.update(
-                        {key_list[entry]: shutter_speed_EXIF_dict[
+                        {key_list[entry]: input_dict[
                             key_list[entry]]})
                 elif (str(shutter_list_sorted[item]) in 
                 reverse_dict(shutter_speed_frac_dec)):
                     sorted_dict.update(
-                        {shutter_list_sorted[item]: shutter_speed_EXIF_dict[
+                        {shutter_list_sorted[item]: input_dict[
                             key_list[entry]]})
 
     else:
@@ -472,64 +514,58 @@ def sort_dict_by_key(input_dict, mode):
                 {key_list[item]: input_dict_str[str(key_list[item])]})
     return sorted_dict
 
-
-def sort_EXIF(input_exif_dict, metadata_tally_dict, input_parameters):
+def sort_EXIF(input_exif_dict, input_parameters):
     #Extract photo metadata and sort to designated dictionaries
     for entry in range(len(input_parameters)):
         item = input_parameters[entry]
         search_key = input_exif_dict[item]
-        if search_key not in metadata_tally_dict:
-            metadata_tally_dict[search_key] = 1
+        if search_key not in tally.metadata:
+            tally.init_key(tally.metadata, search_key)
             if item == 'Make':
-                dict_init_key(manufacturers_EXIF_dict, search_key)
+                manufacturers.init_key(manufacturers.metadata, search_key)
             elif item == 'CameraModelName':
-                dict_init_key(cameras_EXIF_dict, search_key)
+                cameras.init_key(cameras.metadata, search_key)
             elif item == 'LensID':
-                dict_init_key(lenses_EXIF_dict, search_key)
-            elif item == 'ExposureProgram':
-                dict_init_key(mode_EXIF_dict, search_key)
-            elif item == 'ExposureMode':
-                dict_init_key(mode_EXIF_dict, search_key)  
+                lenses.init_key(lenses.metadata, search_key)
+            elif item == 'ExposureProgram' or item == 'ExposureMode':
+                mode.init_key(mode.metadata, search_key)
             elif item == 'FNumber':
-                dict_init_key(aperture_EXIF_dict, search_key)  
+                aperture.init_key(aperture.metadata, search_key)
             elif item == 'ExposureTime':
-                dict_init_key(shutter_speed_EXIF_dict, search_key)  
+                shutter_speed.init_key(shutter_speed.metadata, search_key)
             elif item == 'ISO':
-                dict_init_key(iso_EXIF_dict, search_key)  
+                iso.init_key(iso.metadata, search_key)
             elif item == 'FocalLength':
-                dict_init_key(focal_length_EXIF_dict, search_key)  
-        elif search_key in metadata_tally_dict:
-            metadata_tally_dict[search_key] = metadata_tally_dict.get(
-                search_key, 0) + 1
+                focal_length.init_key(focal_length.metadata, search_key)
+        elif search_key in tally.metadata:
+            tally.incr_key(tally.metadata, search_key)
             if item == 'Make':
-                dict_incr_key(manufacturers_EXIF_dict, search_key)
+                manufacturers.incr_key(manufacturers.metadata, search_key)
             elif item == 'CameraModelName':
-                dict_incr_key(cameras_EXIF_dict, search_key)
+                cameras.incr_key(cameras.metadata, search_key)
             elif item == 'LensID':
-                dict_incr_key(lenses_EXIF_dict, search_key)
-            elif item == 'ExposureProgram':
-                dict_incr_key(mode_EXIF_dict, search_key)
-            elif item == 'ExposureMode':
-                dict_incr_key(mode_EXIF_dict, search_key)                 
+                lenses.incr_key(lenses.metadata, search_key)
+            elif item == 'ExposureProgram' or item == 'ExposureMode':
+                mode.incr_key(mode.metadata, search_key)              
             elif item == 'FNumber':
-                dict_incr_key(aperture_EXIF_dict, search_key)  
+                aperture.incr_key(aperture.metadata, search_key)  
             elif item == 'ExposureTime':
-                dict_incr_key(shutter_speed_EXIF_dict, search_key)  
+                shutter_speed.incr_key(shutter_speed.metadata, search_key)  
             elif item == 'ISO':
-                dict_incr_key(iso_EXIF_dict, search_key)  
+                iso.incr_key(iso.metadata, search_key)  
             elif item == 'FocalLength':
-                dict_incr_key(focal_length_EXIF_dict, search_key)
+                focal_length.incr_key(focal_length.metadata, search_key)
 
 def sort_unclassified_EXIF(metadata_tally_dict):
     metadata_dict_list = [
-        manufacturers_EXIF_dict,
-        cameras_EXIF_dict,
-        lenses_EXIF_dict,
-        mode_EXIF_dict,
-        aperture_EXIF_dict,
-        shutter_speed_EXIF_dict,
-        iso_EXIF_dict,
-        focal_length_EXIF_dict
+        manufacturers.metadata,
+        cameras.metadata,
+        lenses.metadata,
+        mode.metadata,
+        aperture.metadata,
+        shutter_speed.metadata,
+        iso.metadata,
+        focal_length.metadata
         ]
     # If an entry does not exist in any of the dicts, 
     # add it to the general dict for unclassified items
@@ -552,6 +588,18 @@ exiftool_write_file = "C:/exiftool-12.39/filename_input.txt"
 
 #Counter for photos with no EXIF data
 no_exif = 0
+
+#Initialize metadata objects
+tally = MetadataDict()
+manufacturers = MetadataDict()
+cameras = MetadataDict()
+lenses = MetadataDict()
+mode = MetadataDict()
+aperture = MetadataDict()
+shutter_speed = MetadataDict()
+iso = MetadataDict()
+focal_length = MetadataDict()
+unclassified = MetadataDict()
 
 #Set timer start
 time_start = datetime.datetime.now()
@@ -707,17 +755,13 @@ elif selection == 3:
     print('Metadata extracted successfully')
 
     #print('\nMetadata Tally:')
-    #printDictLineByLine(metadata_tally_dict)
+    #print_dict_line_by_line(metadata_tally_dict)
 
     #Remove sorted items from original dictionary 
     #to make a list of unclassified items
     print('\nSorting metadata...')
-    metadata_tally_dict = sort_unclassified_EXIF(metadata_tally_dict)
+    unclassified.metadata = sort_unclassified_EXIF(tally.metadata)
     print('Sorting complete')
-
-    print(lenses_EXIF_dict)
-    print(focal_length_EXIF_dict)
-    print(aperture_EXIF_dict)
 
     #Print out results
     print_all_EXIF_dicts()
@@ -796,7 +840,7 @@ elif selection == 4:
     #Remove sorted items from original dictionary 
     #to make a list of unclassified items
     print('\nSorting metadata...')
-    metadata_tally_dict = sort_unclassified_EXIF(metadata_tally_dict)
+    unclassified.metadata = sort_unclassified_EXIF(tally.metadata)
     print('Sorting complete')
 
     #Print out results
@@ -834,62 +878,30 @@ if selection == 00:
 if selection == 3 or selection == 4:
 
     #Prepare EXIF dictionaries for export to disk
-    manufacturers = manufacturers_EXIF_dict
-    cameras = cameras_EXIF_dict
-    lenses = lenses_EXIF_dict
-    modes = mode_EXIF_dict
-    apertures = sort_dict_by_key(aperture_EXIF_dict, 'float')
-    shutter_speed = sort_dict_by_key(shutter_speed_EXIF_dict, 'shutter')
-    iso = sort_dict_by_key(iso_EXIF_dict, 'int')
-    focal_length = sort_dict_by_key(focal_length_EXIF_dict, 'focal_length')
-    unclassified = metadata_tally_dict
-
-    #Insert any null values
-    dict_list = [manufacturers, cameras, lenses, modes, apertures, 
-    shutter_speed, iso, focal_length, unclassified]
-    if selection == 3:
-        expected_total_photos = len(files_list)
-    elif selection == 4:
-        expected_total_photos = len(full_file_list)
-    for item in range(len(dict_list)):
-        actual_total_photos = sum(dict_list[item].values())
-        if actual_total_photos != expected_total_photos:
-            if no_exif == 0:
-                total_diff = expected_total_photos - actual_total_photos
-                dict_list[item].update({'N/A': total_diff})
-            else:
-                total_diff = (expected_total_photos - actual_total_photos - 
-                no_exif)
-                if total_diff != 0:
-                    dict_list[item].update({'N/A': total_diff})
-                dict_list[item].update({'No Metadata': no_exif})               
-
-    #Convert dictionaries into lists
-    manufacturers = list(manufacturers.items())
-    cameras = list(cameras.items())
-    lenses = list(lenses.items())
-    modes = list(modes.items())
-    apertures = list(apertures.items())
-    shutter_speed = list(shutter_speed.items())
-    iso = list(iso.items())
-    focal_length = list(focal_length.items())
-    unclassified = list(unclassified.items())
+    manufacturers.prepare_for_export(manufacturers.metadata)
+    cameras.prepare_for_export(cameras.metadata)
+    lenses.prepare_for_export(lenses.metadata)
+    mode.prepare_for_export(mode.metadata)
+    aperture.prepare_for_export(sort_dict_by_key(aperture.metadata, 'float'))
+    shutter_speed.prepare_for_export(sort_dict_by_key(shutter_speed.metadata, 'shutter'))
+    iso.prepare_for_export(sort_dict_by_key(iso.metadata, 'int'))
+    focal_length.prepare_for_export(sort_dict_by_key(focal_length.metadata, 'focal_length'))
+    unclassified.prepare_for_export(unclassified.metadata)
 
     #Combine each list into a few large lists (the library requires each
     #entire page to be a single large list)
-    title_manufacturer = [["Manufacturer", "Count"]] + manufacturers + [""]
-    title_cameras = [["Cameras", "Count"]] + cameras + [""]
-    title_lenses = [["Lenses", "Count"]] + lenses + [""]
-    title_modes = [["Shooting Modes", "Count"]] + modes + [""]
-    title_apertures = [["Apertures", "Count"]] + apertures + [""]
-    title_shutter_speed = [["Shutter Speed", "Count"]] + shutter_speed + [""]
-    title_iso = [["ISO", "Count"]] + iso + [""]
-    title_focal_length = [["Focal Length", "Count"]] + focal_length + [""]
-    title_unclassified = [['Unclassified', "Count"]] + unclassified + [""]
+    manufacturers.format_for_ods("Manufacturer")
+    cameras.format_for_ods("Cameras")
+    lenses.format_for_ods("Lenses")
+    mode.format_for_ods("Shooting Modes")
+    aperture.format_for_ods("Apertures")
+    shutter_speed.format_for_ods("Shutter Speed")
+    iso.format_for_ods("ISO")
+    focal_length.format_for_ods("Focal Length")
+    unclassified.format_for_ods("Unclassified")
 
-    write_camera = title_manufacturer + title_cameras + title_lenses
-    write_image = (title_modes + title_apertures + title_shutter_speed + 
-    title_iso + title_focal_length)
+    write_camera = manufacturers.to_ods + cameras.to_ods + lenses.to_ods
+    write_image = mode.to_ods + aperture.to_ods + shutter_speed.to_ods + iso.to_ods + focal_length.to_ods
 
     #Write data to disk
     write_out = {"Camera": write_camera, "Image": write_image}
