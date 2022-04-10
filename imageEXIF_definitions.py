@@ -273,11 +273,6 @@ missing_lens_manufacturer = {
     'DMC-FZ28': 'Leica'
     }
 
-missing_ISO_metadata = {
-    'Canon PowerShot S45': '-1',
-    'DMC-FZ28': '-1'
-    }
-
 manual_lens_filler = {
     'FNumber': '0.0',
     'FocalLength': '0.0 mm (35 mm equivalent: 0.0 mm)',
