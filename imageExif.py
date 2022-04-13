@@ -583,26 +583,29 @@ def sort_unclassified_EXIF(metadata_tally_dict):
         k not in metadata_dict_list[dictionaries]})
     return metadata_tally_dict
 
-def write_metadata_to_ods(input_object_list, selection):
-    #Finalize the data for output
-    for item in range(len(input_object_list)):
-        category = input_object_list[item]
-        metadata = getattr(category, 'metadata')
+def write_metadata_to_ods(selection, name_out):
 
-        if category == 'aperture':
-            metadata.prepare_for_export(
-                sort_dict_by_key(category.metadata, 'float'))
-        elif category == 'shutter_speed':
-            metadata.prepare_for_export(
-                sort_dict_by_key(category.metadata, 'shutter'))
-        elif category == 'iso':
-            metadata.prepare_for_export(
-                sort_dict_by_key(category.metadata, 'int'))
-        elif category == 'focal_length':
-            metadata.prepare_for_export(
-                sort_dict_by_key(category.metadata, 'focal_length'))
-        else:
-            category.prepare_for_export(metadata)
+    categories = [manufacturers, cameras, lenses, mode, aperture, shutter_speed, iso, focal_length, unclassified]
+
+    #Finalize the data for output
+    manufacturers.prepare_for_export(
+        manufacturers.metadata)
+    cameras.prepare_for_export(
+        cameras.metadata)
+    lenses.prepare_for_export(
+        lenses.metadata)
+    mode.prepare_for_export(
+        mode.metadata)
+    aperture.prepare_for_export(
+        sort_dict_by_key(aperture.metadata, 'float'))
+    shutter_speed.prepare_for_export(
+        sort_dict_by_key(shutter_speed.metadata, 'shutter'))
+    iso.prepare_for_export(
+        sort_dict_by_key(iso.metadata, 'int'))
+    focal_length.prepare_for_export(
+        sort_dict_by_key(focal_length.metadata, 'focal_length'))
+    unclassified.prepare_for_export(
+        unclassified.metadata)
 
     #Combine each list into a few large lists (the library requires each
     #entire page to be a single large list)
@@ -610,8 +613,8 @@ def write_metadata_to_ods(input_object_list, selection):
         "Manufacturer", "Cameras", "Lenses", "Shooting Modes", "Apertures",
         "Shutter Speed", "ISO", "Focal Length", "Unclassified"]
 
-    for item in range(len(input_object_list)):
-        input_object_list[item].format_for_ods(labels[item])
+    for item in range(len(categories)):
+        categories[item].format_for_ods(labels[item])
 
     #Prepare the ods file sheets
     write_camera = manufacturers.to_ods + cameras.to_ods + lenses.to_ods
@@ -623,14 +626,14 @@ def write_metadata_to_ods(input_object_list, selection):
     write_out = {"Camera": write_camera, "Image": write_image}
 
     if selection == 3:
-        filename_out = ("statistics_[" + directory.split("\\")[-1] + "]"
+        filename_out = ("statistics_[" + name_out.split("\\")[-1] + "]"
         "[single_folder].ods")
     elif selection == 4:
-        filename_out = ("statistics_[" + directory.split("\\")[-1] + "]"
+        filename_out = ("statistics_[" + name_out.split("\\")[-1] + "]"
         "[with_subfolders].ods")
     elif selection == 5:
         filename_out = (
-            "statistics_" + filled_dirs[item].replace("\\", "_") + ".ods")
+            "statistics_" + name_out.replace("\\", "_") + ".ods")
         
     pyexcel_ods3.save_data(filename_out, write_out) 
 
@@ -963,12 +966,7 @@ elif selection == 5:
         #print_all_EXIF_dicts()
 
         #Prepare EXIF dictionaries for export to disk
-        object_metadata_list = [
-            manufacturers, cameras, lenses, mode, aperture, 
-            shutter_speed, iso, focal_length, unclassified
-            ]
-
-        write_metadata_to_ods(object_metadata_list, selection)
+        write_metadata_to_ods(selection, filled_dirs[item])
 
         #Reset detadata objects for next run
         tally = MetadataDict()
@@ -1014,13 +1012,9 @@ if selection == 00:
 # PART 3: Output results to file
 #-------------------------------------------------------------------------------
 
-#Prepare EXIF dictionaries for export to disk
-object_metadata_list = [
-    manufacturers, cameras, lenses, mode, aperture, 
-    shutter_speed, iso, focal_length, unclassified
-    ]
-
-write_metadata_to_ods(object_metadata_list, selection)
+if selection == 3 or selection == 4:
+    #Prepare EXIF dictionaries for export to disk
+    write_metadata_to_ods(selection, directory)
 
 #Closing messages
 print('\nAll processes completed')
